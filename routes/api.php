@@ -8,7 +8,8 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
 use App\Models\Category;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OtpMail;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -42,19 +43,19 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('categorie
 // route  group protected by auth sanctum
 // Route::middleware('auth:sanctum')->group(function () {
 
-// product routes
-Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
-Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
+    // product routes
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+    Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
 
-// brand routes
-Route::post('/brands', [BrandController::class, 'store'])->name('brands.store');
-Route::put('/brands/{id}', [BrandController::class, 'update'])->name('brands.update');
-Route::delete('/brands/{id}', [BrandController::class, 'destroy'])->name('brands.destroy');
+    // brand routes
+    Route::post('/brands', [BrandController::class, 'store'])->name('brands.store');
+    Route::put('/brands/{id}', [BrandController::class, 'update'])->name('brands.update');
+    Route::delete('/brands/{id}', [BrandController::class, 'destroy'])->name('brands.destroy');
 
-// category routes
-Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
-Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
-Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+    // category routes
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
 // });

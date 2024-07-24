@@ -1,4 +1,4 @@
-<?php
+<?php   
 
 namespace App\Http\Controllers;
 
@@ -7,18 +7,12 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Auth\Events\PasswordReset;
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
-    /**
-     * Handle user login and return a token.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+
     public function login(Request $request)
     {
         // Validate request data
@@ -33,6 +27,7 @@ class UserController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
+                "status" => "error",
                 "data" => [
                     "errors" => $validator->errors()
                 ]
@@ -44,27 +39,24 @@ class UserController extends Controller
 
         // Check if user exists and password is correct
         if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'The provided credentials are incorrect.'
+            ], 401);
         }
 
         // Generate token for the user
         $token = $user->createToken("tokenName")->plainTextToken;
 
         return response()->json([
+            "status" => "success",
             "data" => [
                 "token" => $token
             ]
-        ]);
+        ], 200);
     }
+    
 
-    /**
-     * Handle user registration.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function register(Request $request)
     {
         // Validate request data
@@ -84,6 +76,7 @@ class UserController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
+                "status" => "error",
                 "data" => [
                     "errors" => $validator->errors()
                 ]
@@ -98,22 +91,18 @@ class UserController extends Controller
         ]);
 
         return response()->json([
+            'status' => 'success',
             'message' => 'Registration successful'
         ], 201);
     }
 
-    /**
-     * Handle user logout.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function logout(Request $request)
     {
         // Revoke current token
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
+            'status' => 'success',
             'message' => 'Logout successful'
         ], 200);
     }
@@ -129,6 +118,7 @@ class UserController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
+                "status" => "error",
                 "data" => [
                     "errors" => $validator->errors()
                 ]
@@ -138,29 +128,44 @@ class UserController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found'
+            ], 404);
         }
 
-        // Here you can send an email to the user with instructions
-        // But we will assume the frontend handles this
+        // Generate OTP
+        $otp = Str::random(6);
+        $user->otp = $otp;
+        $user->otp_expires_at = Carbon::now()->addMinutes(10);
+        $user->save();
 
-        return response()->json(['message' => 'Password reset email sent'], 200);
+        // Return OTP in the response
+        return response()->json([
+            'status' => 'success',
+            'message' => 'OTP generated successfully',
+            'otp' => $otp
+        ], 200);
     }
+
     public function resetPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|min:6|confirmed',
+            'otp' => 'required|string',
         ], [
             'email.required' => 'Email is required.',
             'email.email' => 'Invalid email format.',
             'password.required' => 'Password is required.',
             'password.min' => 'Password must be at least 6 characters.',
             'password.confirmed' => 'Passwords do not match.',
+            'otp.required' => 'OTP is required.',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
+                "status" => "error",
                 "data" => [
                     "errors" => $validator->errors()
                 ]
@@ -170,14 +175,28 @@ class UserController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found'
+            ], 404);
         }
 
+        if ($user->otp !== $request->otp || Carbon::now()->greaterThan($user->otp_expires_at)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid or expired OTP'
+            ], 400);
+        }
+
+        // Reset password
         $user->password = Hash::make($request->password);
+        $user->otp = null;
+        $user->otp_expires_at = null;
         $user->save();
 
-        event(new PasswordReset($user));
-
-        return response()->json(['message' => 'Password reset successful'], 200);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Password reset successful'
+        ], 200);
     }
 }

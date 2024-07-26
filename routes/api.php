@@ -41,7 +41,7 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('categorie
 
 
 // route  group protected by auth sanctum
-// Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
 
     // product routes
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
@@ -58,4 +58,4 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('categorie
     Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
-// });
+});

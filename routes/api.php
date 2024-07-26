@@ -9,7 +9,6 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\UserController;
 use App\Models\Category;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\OtpMail;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -28,6 +27,7 @@ Route::post('/register', [UserController::class, 'register'])->name('user.regist
 Route::post('/logout', [UserController::class, 'logout'])->name('user.logout')->middleware('auth:sanctum');
 Route::post('/forgot-password', [UserController::class, 'forgotPassword'])->name('password.email');
 Route::post('/reset-password', [UserController::class, 'resetPassword'])->name('password.reset');
+Route::post('/verify-otp', [UserController::class, 'verifyOtp']);
 
 // product routes
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');

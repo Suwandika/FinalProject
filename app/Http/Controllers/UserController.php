@@ -167,50 +167,6 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function forgotPassword(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-        ], [
-            'email.required' => 'Email is required.',
-            'email.email' => 'Invalid email format.',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                "status" => "error",
-                "data" => [
-                    "errors" => $validator->errors()
-                ]
-            ], 422);
-        }
-
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User not found'
-            ], 404);
-        }
-
-        // Generate OTP
-        $otp = Str::random(6);
-        $user->otp = $otp;
-        $user->otp_expires_at = Carbon::now()->addMinutes(10);
-        $user->otp_verified = false; // Mark OTP as not verified
-        $user->save();
-
-        // Here you would typically send the OTP via email or SMS
-        // For demonstration, we return it in the response (remove in production)
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'OTP generated successfully',
-            'otp' => $otp
-        ], 200);
-    }
-
     // public function forgotPassword(Request $request)
     // {
     //     $validator = Validator::make($request->all(), [
@@ -245,14 +201,62 @@ class UserController extends Controller
     //     $user->otp_verified = false; // Mark OTP as not verified
     //     $user->save();
 
-    //     // Send OTP via email
-    //     Mail::to($user->email)->send(new OtpMail($otp));
+    //     // Here you would typically send the OTP via email or SMS
+    //     // For demonstration, we return it in the response (remove in production)
 
     //     return response()->json([
     //         'status' => 'success',
-    //         'message' => 'OTP sent successfully. Please check your email.',
+    //         'message' => 'OTP generated successfully',
+    //         'otp' => $otp
     //     ], 200);
     // }
+
+    public function forgotPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+        ], [
+            'email.required' => 'Email is required.',
+            'email.email' => 'Invalid email format.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "status" => "error",
+                "data" => [
+                    "errors" => $validator->errors()
+                ]
+            ], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        $otp = Str::random(6);
+        $user->otp = $otp;
+        $user->otp_expires_at = Carbon::now()->addMinutes(10);
+        $user->otp_verified = false;
+        $user->save();
+
+        try {
+            Mail::to($user->email)->send(new OtpMail($otp));
+            return response()->json([
+                'status' => 'success',
+                'message' => 'OTP sent successfully. Please check your email.',
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to send OTP. Error: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 
     public function verifyOtp(Request $request)
     {

@@ -15,7 +15,7 @@ class BrandController extends Controller
     {
         $brands = Brand::all();
 
-        return response()->json([ "data" => $brands ]);
+        return response()->json(["data" => $brands]);
     }
 
     /**
@@ -23,26 +23,26 @@ class BrandController extends Controller
      */
     public function store(Request $request)
     {
-        $validateData = Validator::make($request->all(),[
-            'brand_name' => 'required',
-        ],
-        [ 
-            'brand_name.required' => 'wajib ada, harus berupa teks string',
+        $validateData = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+        ], [
+            'name.required' => 'wajib ada, harus berupa teks string.',
         ]);
 
         if ($validateData->fails()) {
             return response()->json(['errors' => $validateData->errors()], 422);
-        } 
-        
+        }
+
         Brand::create($validateData->validated());
-        return response()->json(['message' => 'Brand berhasil disimpan'], 201);
+        return response()->json(['message' => 'Brand successfully saved'], 201);
     }
+
 
     /**
      * Display the specified resource.
      */
     public function show(string $id)
-    {   
+    {
         //
     }
 
@@ -53,43 +53,40 @@ class BrandController extends Controller
     {
         $brand = Brand::find($id);
 
-        if(!$brand) {
+        if (!$brand) {
             return response()->json([
                 'message' => "Brand dengan id $id tidak ditemukan"
             ], 404);
         }
 
-        $validateData = Validator::make($request->all(),[
-            'brand_name' => 'required',
-        ],
-        [ 
-            'brand_name.required' => 'wajib ada, harus berupa teks string',
+        $validateData = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+        ], [
+            'name.required' => 'wajib ada, harus berupa teks string.',
         ]);
 
         if ($validateData->fails()) {
             return response()->json(['errors' => $validateData->errors()], 422);
-        } 
+        }
 
         $brand->update($validateData->validated());
-        return response()->json(['message' => 'Brand berhasil disimpan'], 201);
+        return response()->json(['message' => 'Produk berhasil diupdate',], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy(string $id)
     {
         $brand = Brand::find($id);
 
-        if(!$brand) {
+        if (!$brand) {
             return response()->json([
                 'message' => "Brand dengan id $id tidak ditemukan"
             ], 404);
-        }
+        };
 
-        $products = $brand->products()->get();
-
+        $brandName = $brand->brand_name;
         $brand->delete();
-        return response()->json(['message' => "Brand : $brand->brand_name Berhasil dihapus", 'product_init' => $products], 200);
+
+        return response()->json(['message' => "Brand: $brandName berhasil dihapus"], 200);
     }
 }

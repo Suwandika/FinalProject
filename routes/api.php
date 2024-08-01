@@ -47,7 +47,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
-
+    Route::get('products/{id}', [ProductController::class, 'show']);
+    
     // brand routes
     Route::post('/brands', [BrandController::class, 'store'])->name('brands.store');
     Route::put('/brands/{id}', [BrandController::class, 'update'])->name('brands.update');

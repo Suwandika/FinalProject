@@ -24,10 +24,10 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $validateData = Validator::make($request->all(),[
-            'category_name' => 'required',
+            'name' => 'required',
         ],
         [ 
-            'category_name.required' => 'wajib ada',
+            'name.required' => 'wajib ada',
         ]);
 
         if ($validateData->fails()) {
@@ -60,10 +60,10 @@ class CategoryController extends Controller
         }
 
         $validateData = Validator::make($request->all(),[
-            'category_name' => 'required',
+            'name' => 'required',
         ],
         [ 
-            'category_name.required' => 'wajib ada',
+            'name.required' => 'wajib ada',
         ]);
 
         if ($validateData->fails()) {
@@ -90,6 +90,6 @@ class CategoryController extends Controller
         $products = $category->products()->get();
 
         $category->delete();
-        return response()->json(['message' => "Category : $category->category_name Berhasil dihapus", 'product_init' => $products], 200);
+        return response()->json(['message' => "Category : $category->category_name Berhasil dihapus",], 200);
     }
 }

@@ -15,7 +15,7 @@ class CategoryController extends Controller
     {
         $categories = Category::all();
 
-        return response()->json([ "data" => $categories ]);
+        return response()->json(["data" => $categories]);
     }
 
     /**
@@ -23,17 +23,20 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $validateData = Validator::make($request->all(),[
-            'name' => 'required',
-        ],
-        [ 
-            'name.required' => 'wajib ada',
-        ]);
+        $validateData = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required',
+            ],
+            [
+                'name.required' => 'wajib ada',
+            ]
+        );
 
         if ($validateData->fails()) {
             return response()->json(['errors' => $validateData->errors()], 422);
-        } 
-        
+        }
+
         Category::create($validateData->validated());
         return response()->json(['message' => 'Category berhasil disimpan'], 201);
     }
@@ -43,7 +46,15 @@ class CategoryController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $category = Category::find($id);
+
+        if (!$category) {
+            return response()->json([
+                'message' => "Category dengan id $id tidak ditemukan"
+            ], 404);
+        }
+
+        return response()->json($category, 200);
     }
 
     /**
@@ -53,22 +64,25 @@ class CategoryController extends Controller
     {
         $category = Category::find($id);
 
-        if(!$category) {
+        if (!$category) {
             return response()->json([
                 'message' => "Category dengan id $id tidak ditemukan"
             ], 404);
         }
 
-        $validateData = Validator::make($request->all(),[
-            'name' => 'required',
-        ],
-        [ 
-            'name.required' => 'wajib ada',
-        ]);
+        $validateData = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required',
+            ],
+            [
+                'name.required' => 'wajib ada',
+            ]
+        );
 
         if ($validateData->fails()) {
             return response()->json(['errors' => $validateData->errors()], 422);
-        } 
+        }
 
         $category->update($validateData->validated());
         return response()->json(['message' => 'Category berhasil di-update'], 201);
@@ -81,7 +95,7 @@ class CategoryController extends Controller
     {
         $category = Category::find($id);
 
-        if(!$category) {
+        if (!$category) {
             return response()->json([
                 'message' => "Category dengan id $id tidak ditemukan"
             ], 404);

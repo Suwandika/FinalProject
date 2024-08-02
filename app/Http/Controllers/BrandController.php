@@ -43,7 +43,15 @@ class BrandController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $brand = Brand::find($id);
+
+        if (!$brand) {
+            return response()->json([
+                'message' => "Brand dengan id $id tidak ditemukan"
+            ], 404);
+        }
+
+        return response()->json($brand, 200);
     }
 
     /**

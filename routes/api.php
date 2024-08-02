@@ -35,9 +35,11 @@ Route::get('/products/{id}', [ProductController::class, 'show'])->name('products
 
 // brand routes
 Route::get('/brands', [BrandController::class, 'index'])->name('brands.index');
+Route::get('/brands/{id}', [BrandController::class, 'show'])->name('brands.show');
 
 // category routes
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
 
 
 // route  group protected by auth sanctum

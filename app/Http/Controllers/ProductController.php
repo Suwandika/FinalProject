@@ -11,9 +11,20 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
+        $validSortColumns = ['name', 'price', 'created_at'];
+        $validSortDirections = ['asc', 'desc'];
+
         $products = Product::with('brand')
             ->when($request->keyword, function ($query, $keyword) {
                 return $query->where('name', 'like', '%' . $keyword . '%');
+            })
+            ->when($request->sort_by, function ($query, $sortBy) use ($request, $validSortColumns, $validSortDirections) {
+                if (in_array($sortBy, $validSortColumns)) {
+                    $sortDirection = $request->get('sort_direction', 'asc');
+                    if (in_array($sortDirection, $validSortDirections)) {
+                        return $query->orderBy($sortBy, $sortDirection);
+                    }
+                }
             })
             ->paginate(10);
 
